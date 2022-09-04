@@ -34,11 +34,11 @@ Covariant elements, and eigenvalues with eigenvectors
 
 n = 3
 x = np.random.normal(size=n)
-print(f"mean value of x: {np.mean(x)}")
+#print(f"mean value of x: {np.mean(x)}")
 y = 4 + 3*x + np.random.normal(size=n)
-print(f"mean value of y: {np.mean(y)}")
+#print(f"mean value of y: {np.mean(y)}")
 z = x**3+np.random.normal(size=n)
-print(f"mean value of z: {np.mean(z)}")
+#print(f"mean value of z: {np.mean(z)}")
 
 W = np.vstack([x, y, z]) #Stacks up arrays into a matrix
 #print(W)
@@ -46,5 +46,14 @@ Sigma = np.cov(W)
 #print(Sigma)
 
 eigenvalues, eigenvectors = np.linalg.eig(Sigma)
-print(eigenvalues)
-print(eigenvectors)
+# print(eigenvalues)
+# print(eigenvectors)
+
+import matplotlib.pyplot as plt
+from scipy import sparse
+
+eye = np.eye(4) #makes 4x4 identity matrix
+#print(eye)
+
+sparse_mtx = sparse.csr_matrix(eye) #Don't know what 
+print(sparse_mtx)
