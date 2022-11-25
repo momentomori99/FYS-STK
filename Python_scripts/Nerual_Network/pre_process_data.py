@@ -21,10 +21,10 @@ class PreProcessedData:
         self.inputs = self.inputs.reshape(self.n_inputs, -1)
         self.n_features = len(self.inputs[1]) #number of features
 
-        print("----------------------------------------------------------")
-        print(f"Loading data with {self.n_inputs} number of inputs...")
-        print(f"Number of features for this data: {self.n_features}")
-        print("----------------------------------------------------------")
+        # print("----------------------------------------------------------")
+        # print(f"Loading data with {self.n_inputs} number of inputs...")
+        # print(f"Number of features for this data: {self.n_features}")
+        # print("----------------------------------------------------------")
 
 
     def data(self):
