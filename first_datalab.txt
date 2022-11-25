@@ -1,7 +1,0 @@
-* Github Desktop
-* Jupyter book
-* Check for all usefule python libraries
-	* Check out more about pandas for data handling
-	* You should check out about scikit-learn manual and check some examples
-* Why do we subtract mean value from data ?
-* Why do we prefer mean square error optimization when work with derivatives?
