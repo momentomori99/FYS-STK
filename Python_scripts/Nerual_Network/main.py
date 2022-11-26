@@ -10,6 +10,10 @@ data_train, data_test, target_train, target_test = data_inst.train_test(0.8)
 
 
 inst = Build(data, target)
-inst.backpropagation()
-# build_inst.backpropagation(data, target)
-# build_inst.gradient_descent(data, target)
+hw, hb, ow, ob = inst.train()
+probabilities = inst.feed_forward(hw, hb, ow, ob, data)
+
+prediction = inst.results(probabilities)
+
+for i in range(1000):
+    print(target[i], prediction[i])

@@ -6,12 +6,14 @@ class Build:
         self.data = data
         self.n_hidden_neurons = 50 #Number of neurons in hidden layer
         self.n_categories = 10 #number of categories as the output (numb. 0 - 9)
+        self.n_inputs = self.data.shape[0]
         self.n_features = self.data.shape[1]
         self.onehot_vector = self.onehot(target)
         self.epochs = 10
         self.batch_size = 100
-        self.eta = 0.1
-        self.lmbd = 0.0
+        self.iterations = self.n_inputs // self.batch_size
+        self.eta = 0.01
+        self.lmbd = 0.01
 
 
         #Defining weights and biases in hidden layer
@@ -29,6 +31,9 @@ class Build:
         a_h, probabilities = self.feed_forward()
         return np.argmax(probabilities, axis=1)
 
+    def results(self, probabilities):
+        return np.argmax(probabilities, axis=1)
+
     def onehot(self, integer_vector):
         n_inputs = len(integer_vector)
         n_categories = np.max(integer_vector) + 1
@@ -37,9 +42,9 @@ class Build:
 
         return onehot_vector
 
-    def feed_forward(self, hidden_weights, hidden_bias, output_weights, output_bias):
+    def feed_forward(self, hidden_weights, hidden_bias, output_weights, output_bias, X):
         #Weighted sum of inputs and the activation to the hidden layer
-        self.z_h = np.matmul(self.data, hidden_weights) + hidden_bias
+        self.z_h = np.matmul(X, hidden_weights) + hidden_bias
         self.a_h = self.sigmoid(self.z_h)
 
         #The same but now in the output layer
@@ -55,10 +60,10 @@ class Build:
 
         return probabilities
 
-    def backpropagation(self):
-        probabilities = self.feed_forward(self.hidden_weights, self.hidden_bias, self.output_weights, self.output_bias)
+    def backpropagation(self, X, Y):
+        probabilities = self.feed_forward(self.hidden_weights, self.hidden_bias, self.output_weights, self.output_bias, X)
         #Calculating the error in the output layer
-        error_output = probabilities - self.onehot_vector
+        error_output = probabilities - Y
         #Calculating the error in the hidde layer
         error_hidden = np.matmul(error_output, self.output_weights.T) * self.a_h * (1 - self.a_h)
 
@@ -68,38 +73,31 @@ class Build:
         output_bias_gradient = np.sum(error_output, axis=0)
 
         # gradient for the hidden layer
-        hidden_weights_gradient = np.matmul(self.data.T, error_hidden)
+        hidden_weights_gradient = np.matmul(X.T, error_hidden)
         hidden_bias_gradient = np.sum(error_hidden, axis=0)
 
-        #Regularization
-        if self.lmbd > 0.0:
-            output_weights_gradient += self.lmbd * self.output_weights
-            hidden_weights_gradient += self.lmbd * self.hidden_weights
 
-        self.output_weights -= self.eta * output_weights_gradient
-        self.output_bias -= self.eta * output_bias_gradient
-        self.hidden_weights -= self.eta * hidden_weights_gradient
-        self.hidden_bias -= self.eta * hidden_bias_gradient
+        return hidden_weights_gradient, hidden_bias_gradient, output_weights_gradient, output_bias_gradient
 
-        return output_weights_gradient, output_bias_gradient, hidden_weights_gradient, hidden_bias_gradient
+    def train(self):
+        data_indices = np.arange(self.n_inputs)
+        for i in range(self.epochs):
+            for j in range(self.iterations):
+                #pick random datapoints:
+                chosen_datapoints = np.random.choice(
+                    data_indices, size=self.batch_size, replace=False
+                )
+                X = self.data[chosen_datapoints]
+                Y = self.onehot_vector[chosen_datapoints]
 
+                dWh, dBh, dWo, dBo = self.backpropagation(X, Y)
 
-    def gradient_descent(self, X, y):
+                if self.lmbd > 0.0:
+                    dWo += self.lmbd * self.output_weights
+                    dWh += self.lmbd * self.hidden_weights
+                self.output_weights -= self.eta * dWo
+                self.output_bias -= self.eta * dBo
+                self.hidden_weights -= self.eta * dWh
+                self.hidden_bias -= self.eta * dBh
 
-        print("Old accuracy on training data: " + str(accuracy_score(self.predict(), y)))
-        eta = 0.01
-        lmbd = 0.01
-        for i in range(1000):
-            #Getting them gradients:
-            dWo, dBo, dWh, dBh = self.backpropagation(X, y)
-
-            #Regularization:
-            dWo += lmbd * self.output_weights
-            dWh += lmbd * self.hidden_weights
-
-            self.output_weights -= eta * dWo
-            self.output_bias -= eta * dBo
-            self.hidden_weights -= eta * dWh
-            self.hidden_bias -= eta * dBh
-
-        print("New accuracy on training data: " + str(accuracy_score(self.predict(), y)))
+        return self.hidden_weights, self.hidden_bias, self.output_weights, self.output_bias
